@@ -287,6 +287,14 @@ class WebClient
             return;
         }
 
+        // Check for Google's Private Prefetch Proxy
+        if ($userAgent === 'Chrome Privacy Preserving Prefetch Proxy') {
+            // Private Prefetch Proxy does not provide any further details like e.g. version
+            $this->browser = self::CHROME;
+
+            return;
+        }
+
         $patternBrowser = '';
 
         // Attempt to detect the browser type.  Obviously we are only worried about major browsers.
@@ -394,27 +402,32 @@ class WebClient
         } elseif (\stripos($userAgent, 'Edg') !== false) {
             $this->engine = self::BLINK;
         } elseif (\stripos($userAgent, 'Chrome') !== false) {
-            $result  = \explode('/', \stristr($userAgent, 'Chrome'));
-            $version = \explode(' ', $result[1]);
+            $this->engine = self::BLINK;
 
-            if ($version[0] >= 28) {
-                $this->engine = self::BLINK;
-            } else {
-                $this->engine = self::WEBKIT;
-            }
-        } elseif (\stripos($userAgent, 'AppleWebKit') !== false || \stripos($userAgent, 'blackberry') !== false) {
-            if (\stripos($userAgent, 'AppleWebKit') !== false) {
-                $result  = \explode('/', \stristr($userAgent, 'AppleWebKit'));
+            $result = \explode('/', \stristr($userAgent, 'Chrome'));
+
+            if (isset($result[1])) {
                 $version = \explode(' ', $result[1]);
 
-                if ($version[0] === 537.36) {
-                    // AppleWebKit/537.36 is Blink engine specific, exception is Blink emulated IEMobile, Trident or Edge
-                    $this->engine = self::BLINK;
+                if (version_compare($version[0], '28.0', 'lt')) {
+                    $this->engine = self::WEBKIT;
                 }
             }
-
-            // Evidently blackberry uses WebKit and doesn't necessarily report it.  Bad RIM.
+        } elseif (\stripos($userAgent, 'AppleWebKit') !== false || \stripos($userAgent, 'blackberry') !== false) {
             $this->engine = self::WEBKIT;
+
+            if (\stripos($userAgent, 'AppleWebKit') !== false) {
+                $result = \explode('/', \stristr($userAgent, 'AppleWebKit'));
+
+                if (isset($result[1])) {
+                    $version = \explode(' ', $result[1]);
+
+                    if ($version[0] === '537.36') {
+                        // AppleWebKit/537.36 is Blink engine specific, exception is Blink emulated IEMobile, Trident or Edge
+                        $this->engine = self::BLINK;
+                    }
+                }
+            }
         } elseif (\stripos($userAgent, 'Gecko') !== false && \stripos($userAgent, 'like Gecko') === false) {
             // We have to check for like Gecko because some other browsers spoof Gecko.
             $this->engine = self::GECKO;
