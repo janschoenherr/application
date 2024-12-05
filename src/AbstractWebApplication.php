@@ -938,7 +938,7 @@ abstract class AbstractWebApplication extends AbstractApplication implements Web
             $requestUri = $this->input->server->getString('REQUEST_URI', '');
 
             // If we are working from a CGI SAPI with the 'cgi.fix_pathinfo' directive disabled we use PHP_SELF.
-            if (\strpos(PHP_SAPI, 'cgi') !== false && !\ini_get('cgi.fix_pathinfo') && !empty($requestUri)) {
+            if (\str_contains(PHP_SAPI, 'cgi') && !\ini_get('cgi.fix_pathinfo') && !empty($requestUri)) {
                 // We aren't expecting PATH_INFO within PHP_SELF so this should work.
                 $path = \dirname($this->input->server->getString('PHP_SELF', ''));
             } else {
@@ -951,7 +951,7 @@ abstract class AbstractWebApplication extends AbstractApplication implements Web
         $host = $uri->toString(['scheme', 'user', 'pass', 'host', 'port']);
 
         // Check if the path includes "index.php".
-        if (\strpos($path, 'index.php') !== false) {
+        if (\str_contains($path, 'index.php')) {
             // Remove the index.php portion of the path.
             $path = \substr_replace($path, '', \strpos($path, 'index.php'), 9);
         }
@@ -975,7 +975,7 @@ abstract class AbstractWebApplication extends AbstractApplication implements Web
         $mediaURI = \trim($this->get('media_uri', ''));
 
         if ($mediaURI !== '') {
-            if (\strpos($mediaURI, '://') !== false) {
+            if (\str_contains($mediaURI, '://')) {
                 $this->set('uri.media.full', $mediaURI);
             } else {
                 // Normalise slashes.

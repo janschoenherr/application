@@ -370,7 +370,7 @@ class WebClient
     protected function detectEncoding($acceptEncoding)
     {
         // Parse the accepted encodings.
-        $this->encodings = \array_map('trim', (array) \explode(',', (string) $acceptEncoding));
+        $this->encodings = \array_map('trim', \explode(',', (string) $acceptEncoding));
 
         // Mark this detection routine as run.
         $this->detection['acceptEncoding'] = true;
@@ -470,7 +470,7 @@ class WebClient
     protected function detectLanguage($acceptLanguage)
     {
         // Parse the accepted encodings.
-        $this->languages = \array_map('trim', (array) \explode(',', $acceptLanguage));
+        $this->languages = \array_map('trim', \explode(',', $acceptLanguage));
 
         // Mark this detection routine as run.
         $this->detection['acceptLanguage'] = true;
@@ -591,7 +591,7 @@ class WebClient
             $this->headers = [];
 
             foreach ($_SERVER as $name => $value) {
-                if (\substr($name, 0, 5) == 'HTTP_') {
+                if (\str_starts_with($name, 'HTTP_')) {
                     $this->headers[\str_replace(' ', '-', \ucwords(\strtolower(\str_replace('_', ' ', \substr($name, 5)))))] = $value;
                 }
             }
